@@ -1,29 +1,43 @@
 package com.cesarsolano_ewdincanas.edsar_app
 
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import androidx.compose.ui.tooling.preview.Preview
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.auth
 
 @Composable
-fun Login_Screen(navController: NavHostController) {
-    val usuario = remember { mutableStateOf("") }
-    val contrasena = remember { mutableStateOf("") }
+fun LoginScreen( onClickRegister: () -> Unit = {}, onSuccessfulLogin: () -> Unit = {}
+) {
+    val auth = Firebase.auth
+    val activity = LocalView.current.context as Activity
+
+    var inputEmail by remember { mutableStateOf("") }
+    var inputPassword by remember { mutableStateOf("") }
+    var loginError by remember { mutableStateOf("") }
+    var emailError by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf("") }
+
+
 
     Box(
         modifier = Modifier
@@ -37,6 +51,7 @@ fun Login_Screen(navController: NavHostController) {
                     modifier = Modifier
                         .background(Color.Black, shape = RoundedCornerShape(20.dp))
                         .padding(top = 64.dp, start = 24.dp, end = 24.dp, bottom = 24.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Spacer(modifier = Modifier.height(48.dp))
@@ -50,38 +65,77 @@ fun Login_Screen(navController: NavHostController) {
                         Spacer(modifier = Modifier.height(16.dp))
 
                         OutlinedTextField(
-                            value = usuario.value,
-                            onValueChange = { usuario.value = it },
-                            placeholder = { Text("Usuario", color = Color.LightGray) },
+                            value = inputEmail,
+                            onValueChange = { inputEmail = it },
+                            placeholder = { Text("Correo Electrónico", color = Color.Gray) },
                             shape = RoundedCornerShape(50),
+                            modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedContainerColor = Color.White,
                                 unfocusedContainerColor = Color.White,
                                 focusedTextColor = Color.Black,
                                 unfocusedTextColor = Color.Black
-                            )
+                            ),
+                            isError = emailError.isNotEmpty(),
+                            supportingText = {
+                                if (emailError.isNotEmpty()) {
+                                    Text(emailError, color = Color.Red)
+                                }
+                            }
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
 
                         OutlinedTextField(
-                            value = contrasena.value,
-                            onValueChange = { contrasena.value = it },
-                            placeholder = { Text("Contraseña", color = Color.LightGray) },
-                            visualTransformation = PasswordVisualTransformation(),
+                            value = inputPassword,
+                            onValueChange = { inputPassword = it },
+                            placeholder = { Text("Contraseña", color = Color.Gray) },
                             shape = RoundedCornerShape(50),
+                            modifier = Modifier.fillMaxWidth(),
+                            visualTransformation = PasswordVisualTransformation(),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedContainerColor = Color.White,
                                 unfocusedContainerColor = Color.White,
                                 focusedTextColor = Color.Black,
                                 unfocusedTextColor = Color.Black
-                            )
+                            ),
+                            isError = passwordError.isNotEmpty(),
+                            supportingText = {
+                                if (passwordError.isNotEmpty()) {
+                                    Text(passwordError, color = Color.Red)
+                                }
+                            }
                         )
 
                         Spacer(modifier = Modifier.height(20.dp))
 
+                        if (loginError.isNotEmpty()) {
+                            Text(loginError, color = Color.Red, modifier = Modifier.padding(bottom = 8.dp))
+                        }
+
                         Button(
-                            onClick = { navController.navigate("Home_Screen") },
+                            onClick = {
+                                val isValidEmail = validateEmail(inputEmail).first
+                                val isValidPassword = validatePassword(inputPassword).first
+
+                                emailError = validateEmail(inputEmail).second
+                                passwordError = validatePassword(inputPassword).second
+
+                                if (isValidEmail && isValidPassword) {
+                                    auth.signInWithEmailAndPassword(inputEmail, inputPassword)
+                                        .addOnCompleteListener(activity) { task ->
+                                            if (task.isSuccessful) {
+                                                onSuccessfulLogin()
+                                            } else {
+                                                loginError = when (task.exception) {
+                                                    is FirebaseAuthInvalidCredentialsException -> "Correo o contraseña incorrecta"
+                                                    is FirebaseAuthInvalidUserException -> "No existe una cuenta con este correo"
+                                                    else -> "Error al iniciar sesión. Intenta de nuevo"
+                                                }
+                                            }
+                                        }
+                                }
+                            },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC107)),
                             shape = RoundedCornerShape(50),
                             modifier = Modifier
@@ -99,7 +153,7 @@ fun Login_Screen(navController: NavHostController) {
                             fontSize = 14.sp,
                             textDecoration = TextDecoration.Underline,
                             modifier = Modifier.clickable {
-                                navController.navigate("register")
+                                onClickRegister()
                             }
                         )
                     }
@@ -117,12 +171,7 @@ fun Login_Screen(navController: NavHostController) {
     }
 }
 
-@Preview(showSystemUi = true, showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    val navController = rememberNavController()
-    Login_Screen(navController = navController)
-}
+
 
 
 

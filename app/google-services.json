@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "968022442433",
+    "project_id": "edsar-app",
+    "storage_bucket": "edsar-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:968022442433:android:5e5a4c22b2ec2374812f40",
+        "android_client_info": {
+          "package_name": "com.cesarsolano_ewdincanas.edsar_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLDmXet5QeePaM5N5m6YOi9joKicXBz0I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
