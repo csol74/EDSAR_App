@@ -61,11 +61,28 @@ class MainActivity : ComponentActivity() {
                             myNavController.navigate("login"){
                                 popUpTo(0)
                             }
+                        },
+                            onClickProfile = {
+                                myNavController.navigate("profile")
+
+                        },
+                            onClickNews = {
+                                myNavController.navigate("news")
+                            })
+                        }
+                    composable("profile") {
+                        ProfileScreen(
+                            onNavigateToHome = {
+                                myNavController.navigate("home")
+                            })
+
+                    }
+                    composable("news") {
+                        News_Screen(onBackClick = {
+                            myNavController.popBackStack()
                         })
                     }
                 }
-
-
             }
         }
     }

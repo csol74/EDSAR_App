@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -77,13 +78,14 @@ fun RegisterScreen(onClickBack: () -> Unit = {}, onSuccessfulRegister: () -> Uni
             Spacer(modifier = Modifier.height(5.dp))
 
             Image(
-                painter = painterResource(id = R.drawable.edsar_logo),
-                contentDescription = "Logo",
+                painter = painterResource(id = R.drawable.user_profile),
+                contentDescription = "Imagen de perfil",
                 modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .background(Color.Black)
+                    .size(100.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
             )
+
 
             Spacer(modifier = Modifier.height(1.dp))
             Box(

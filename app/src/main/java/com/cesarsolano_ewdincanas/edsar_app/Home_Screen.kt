@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,7 +31,9 @@ import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onClickLogout: () -> Unit = {}) {
+fun HomeScreen(onClickLogout: () -> Unit = {},
+               onClickProfile: () -> Unit = {},
+               onClickNews: () -> Unit = {}) {
     var showLogout by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -40,11 +43,12 @@ fun HomeScreen(onClickLogout: () -> Unit = {}) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Image(
                             painter = painterResource(id = R.drawable.user_profile),
-                            contentDescription = "Perfil",
+                            contentDescription = "Imagen de perfil",
                             modifier = Modifier
-                                .size(70.dp)
+                                .size(100.dp)
                                 .clip(CircleShape)
-                                .clickable { showLogout = !showLogout }
+                                .clickable { showLogout = !showLogout },
+                            contentScale = ContentScale.Crop
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Hola , ", color = Color.White)
@@ -65,13 +69,13 @@ fun HomeScreen(onClickLogout: () -> Unit = {}) {
                 contentColor = Color.White
 
             ) {
-                IconButton(onClick = { /* perfil */ }) {
+                IconButton(onClick = { onClickProfile() }) {
                     Icon(Icons.Default.Person, contentDescription = "Perfil",
                         modifier = Modifier.size(30.dp))
                 }
                 Spacer(modifier = Modifier.weight(1f))
 
-                IconButton(onClick = { /* notificaciones */ }) {
+                IconButton(onClick = {onClickNews() }) {
                     Icon(Icons.Default.Notifications, contentDescription = "Notificaciones",
                         modifier = Modifier.size(30.dp))
 
