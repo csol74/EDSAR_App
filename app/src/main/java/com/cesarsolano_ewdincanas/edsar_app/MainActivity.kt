@@ -12,84 +12,121 @@ import androidx.compose.ui.Modifier
 import com.cesarsolano_ewdincanas.edsar_app.ui.theme.EDSAR_AppTheme
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Subimos recetas al iniciar (opcional)
+        RecetaUploader.subirRecetasDesdeJson(this)
+
         setContent {
-            EDSAR_AppTheme  {
-
-                val myNavController= rememberNavController()
-                var myStartDestination= "login"
+            EDSAR_AppTheme {
+                val navController = rememberNavController()
+                var myStartDestination = "login"
                 val auth = Firebase.auth
-                val currentUser= auth.currentUser
+                val currentUser = auth.currentUser
 
-
-                if(currentUser != null){
-                    myStartDestination= "home"
-                }else{
-                    myStartDestination="login"
+                if (currentUser != null) {
+                    myStartDestination = "home"
+                } else {
+                    myStartDestination = "login"
                 }
 
                 NavHost(
+                    navController = navController,
+                    startDestination = myStartDestination,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    composable("login") {
+                        LoginScreen(
+                            onClickRegister = {
+                                navController.navigate("register")
+                            },
+                            onSuccessfulLogin = {
+                                navController.navigate("home") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
 
-                    navController= myNavController,
-                    startDestination= myStartDestination,
-                    modifier= Modifier.fillMaxSize()
-                ){
-                    composable("login"){
-                        LoginScreen(onClickRegister = {
-                            myNavController.navigate("register")
-                        }, onSuccessfulLogin = {
-                            myNavController.navigate("home"){
-                                popUpTo("login"){inclusive = true}
+                    composable("register") {
+                        RegisterScreen(
+                            onClickBack = {
+                                navController.popBackStack()
+                            },
+                            onSuccessfulRegister = {
+                                navController.navigate("home") {
+                                    popUpTo(0)
+                                }
                             }
-                        } )
+                        )
                     }
-                    composable( "register"){
-                        RegisterScreen(onClickBack = {
-                            myNavController.popBackStack()
-                        }, onSuccessfulRegister = {
-                            myNavController.navigate("home"){
-                                popUpTo(0)
-                            }
-                        })
-                    }
-                    composable("home"){
-                        HomeScreen(onClickLogout = {
-                            myNavController.navigate("login"){
-                                popUpTo(0)
-                            }
-                        },
+
+                    composable("home") {
+                        HomeScreen(
+                            onClickLogout = {
+                                navController.navigate("login") {
+                                    popUpTo(0)
+                                }
+                            },
                             onClickProfile = {
-                                myNavController.navigate("profile")
-
-                        },
+                                navController.navigate("profile")
+                            },
                             onClickNews = {
-                                myNavController.navigate("news")
-                            })
-                        }
+                                navController.navigate("news")
+                            },
+                            onClickRecetas = {
+                                navController.navigate("listRecetas")
+                            },
+                            onNavigateToMeal = { mealType ->
+                                // Navigate to the meals screen with the meal type as a parameter
+                                navController.navigate("meals/$mealType")
+                            }
+                        )
+                    }
+
                     composable("profile") {
                         ProfileScreen(
                             onNavigateToHome = {
-                                myNavController.navigate("home")
-                            })
-
+                                navController.navigate("home")
+                            }
+                        )
                     }
+
                     composable("news") {
-                        News_Screen(onBackClick = {
-                            myNavController.popBackStack()
-                        })
+                        News_Screen(
+                            onBackClick = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+
+                    composable("listRecetas") {
+                        ListRecetasScreen(
+                            navController = navController,
+                            onNavigateToHome = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+
+                    composable(
+                        route = "meals/{mealType}",
+                        arguments = listOf(navArgument("mealType") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val mealType = backStackEntry.arguments?.getString("mealType") ?: "Comida"
+                        Meals_Screen(
+                            mealType = mealType,
+                            onBackToHome = { navController.popBackStack() }
+                        )
                     }
                 }
             }
         }
     }
 }
-
-
-
-
-
-    

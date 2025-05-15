@@ -13,11 +13,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,14 +23,36 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onClickLogout: () -> Unit = {},
-               onClickProfile: () -> Unit = {},
-               onClickNews: () -> Unit = {}) {
+fun HomeScreen(
+    onClickLogout: () -> Unit = {},
+    onClickProfile: () -> Unit = {},
+    onClickNews: () -> Unit = {},
+    onNavigateToMeal: (String) -> Unit = {},
+    onClickRecetas: () -> Unit = {}
+) {
     var showLogout by remember { mutableStateOf(false) }
+
+    val auth = Firebase.auth
+    val currentUser = auth.currentUser
+    var userName by remember { mutableStateOf("Usuario") }
+
+    // Firebase Firestore user data
+    LaunchedEffect(currentUser?.uid) {
+        currentUser?.uid?.let { uid ->
+            Firebase.firestore.collection("users").document(uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    val user = document.toObject(UserModel::class.java)
+                    userName = user?.name ?: "Usuario"
+                }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -51,8 +69,8 @@ fun HomeScreen(onClickLogout: () -> Unit = {},
                             contentScale = ContentScale.Crop
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Hola , ", color = Color.White)
-                        Text("Endrick.", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("Hola, ", color = Color.White)
+                        Text(userName, color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 },
                 actions = {
@@ -67,30 +85,21 @@ fun HomeScreen(onClickLogout: () -> Unit = {},
             BottomAppBar(
                 containerColor = Color.Black,
                 contentColor = Color.White
-
             ) {
                 IconButton(onClick = { onClickProfile() }) {
-                    Icon(Icons.Default.Person, contentDescription = "Perfil",
-                        modifier = Modifier.size(30.dp))
+                    Icon(Icons.Default.Person, contentDescription = "Perfil", modifier = Modifier.size(30.dp))
                 }
                 Spacer(modifier = Modifier.weight(1f))
-
-                IconButton(onClick = {onClickNews() }) {
-                    Icon(Icons.Default.Notifications, contentDescription = "Notificaciones",
-                        modifier = Modifier.size(30.dp))
-
+                IconButton(onClick = { onClickNews() }) {
+                    Icon(Icons.Default.Notifications, contentDescription = "Notificaciones", modifier = Modifier.size(30.dp))
                 }
                 Spacer(modifier = Modifier.weight(1f))
-
-                IconButton(onClick = { /* menú */ }) {
-                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Menú",
-                        modifier = Modifier.size(30.dp))
+                IconButton(onClick = { onClickRecetas() }) {
+                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Menú", modifier = Modifier.size(30.dp))
                 }
                 Spacer(modifier = Modifier.weight(1f))
-
-                IconButton(onClick = { /* home */ }) {
-                    Icon(Icons.Default.Home, contentDescription = "Home",
-                        modifier = Modifier.size(30.dp))
+                IconButton(onClick = { /* Ya estás en home */ }) {
+                    Icon(Icons.Default.Home, contentDescription = "Home", modifier = Modifier.size(30.dp))
                 }
             }
         },
@@ -105,27 +114,49 @@ fun HomeScreen(onClickLogout: () -> Unit = {},
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(50.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-
                 ) {
                     Text("Cerrar Sesión", color = Color.Black)
                 }
             }
 
-            MealCard("¡A Desayunar!", "Estas listo para hacer un desayuno saludable?", R.drawable.breakfast)
-            MealCard("Hora de almorzar", "Es momento de hacer un almuerzo saludable", R.drawable.lunch)
-            MealCard("Vamos a cenar", "Llegó la noche y con ella tu cena saludable", R.drawable.dinner)
+            MealCard(
+                title = "¡A Desayunar!",
+                description = "¿Estás listo para hacer un desayuno saludable?",
+                imageRes = R.drawable.breakfast,
+                mealType = "Desayuno",
+                onMealSelected = onNavigateToMeal
+            )
+            MealCard(
+                title = "Hora de almorzar",
+                description = "Es momento de preparar un almuerzo saludable.",
+                imageRes = R.drawable.lunch,
+                mealType = "Almuerzo",
+                onMealSelected = onNavigateToMeal
+            )
+            MealCard(
+                title = "Vamos a cenar",
+                description = "Llegó la noche y con ella tu cena saludable.",
+                imageRes = R.drawable.dinner,
+                mealType = "Cena",
+                onMealSelected = onNavigateToMeal
+            )
         }
     }
 }
 
 @Composable
-fun MealCard(title: String, description: String, imageRes: Int) {
+fun MealCard(
+    title: String,
+    description: String,
+    imageRes: Int,
+    mealType: String,
+    onMealSelected: (String) -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .background(Color.Black, shape = RoundedCornerShape(40.dp)),
-
+            .background(Color.Black, shape = RoundedCornerShape(40.dp))
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
@@ -137,16 +168,17 @@ fun MealCard(title: String, description: String, imageRes: Int) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column(
-                modifier = Modifier.weight(1f).padding(end = 8.dp)
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
             ) {
                 Text(text = title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Text(text = description, color = Color.White, fontSize = 14.sp)
             }
             Button(
-                onClick = { /* acción ir */ },
+                onClick = { onMealSelected(mealType) },
                 shape = CircleShape,
-                modifier = Modifier
-                    .size(60.dp),
+                modifier = Modifier.size(60.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White)
             ) {
                 Text("Ir", color = Color.Black)
@@ -154,4 +186,3 @@ fun MealCard(title: String, description: String, imageRes: Int) {
         }
     }
 }
-
