@@ -79,7 +79,7 @@ fun RegisterScreen(onClickBack: () -> Unit = {}, onSuccessfulRegister: () -> Uni
                 Spacer(modifier = Modifier.height(5.dp))
 
                 Image(
-                    painter = painterResource(id = R.drawable.user_profile),
+                    painter = painterResource(id = R.drawable.edsar_logo),
                     contentDescription = "Imagen de perfil",
                     modifier = Modifier
                         .size(100.dp)
