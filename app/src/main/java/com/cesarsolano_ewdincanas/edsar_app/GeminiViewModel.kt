@@ -39,7 +39,13 @@ class GeminiViewModel : ViewModel() {
         _searchQuery.value = query
     }
 
-    fun generateRecipes() {
+    fun generateRecipes(mealType: String) {
+        // Validación de campo vacío
+        if (_searchQuery.value.isBlank()) {
+            _recipeState.value = RecipeState(error = "Por favor escriba los ingredientes")
+            return
+        }
+
         viewModelScope.launch {
             try {
                 _recipeState.value = RecipeState(isLoading = true)

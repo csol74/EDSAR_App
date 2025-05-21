@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -29,10 +28,19 @@ fun Meals_Screen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("¡$mealType!") },
+                title = {
+                    Text(
+                        text = "¡$mealType!",
+                        color = Color.White // ✅ Aquí se corrige el color del título
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackToHome) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Black)
@@ -55,20 +63,11 @@ fun Meals_Screen(
                     .background(Color.White, RoundedCornerShape(20.dp))
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Categorías
-            val categories = listOf("Proteínas Animales", "Proteínas Vegetales", "Vegetales", "Carbohidratos")
-            categories.forEach {
-                CategoryItem(it)
-            }
-
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { viewModel.generateRecipes() },
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally),
+                onClick = { viewModel.generateRecipes(mealType) }, // Puedes pasar mealType si Gemini lo necesita
+                modifier = Modifier.align(Alignment.CenterHorizontally),
                 shape = RoundedCornerShape(30.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White)
             ) {
@@ -77,7 +76,6 @@ fun Meals_Screen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Estado de carga
             if (recipeState.isLoading) {
                 Box(
                     contentAlignment = Alignment.Center,
@@ -87,7 +85,6 @@ fun Meals_Screen(
                 }
             }
 
-            // Error message
             recipeState.error?.let { errorMsg ->
                 Text(
                     text = errorMsg,
@@ -96,7 +93,6 @@ fun Meals_Screen(
                 )
             }
 
-            // Mostrar las recetas
             if (recipeState.recipes.isNotEmpty()) {
                 LazyColumn(
                     modifier = Modifier
@@ -121,10 +117,7 @@ fun RecipeCard(recipe: Recipe) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         shape = RoundedCornerShape(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = "🍽️ ${recipe.name}",
                 fontWeight = FontWeight.Bold,
@@ -154,29 +147,6 @@ fun RecipeCard(recipe: Recipe) {
             recipe.steps.forEach { step ->
                 Text(text = step, modifier = Modifier.padding(vertical = 2.dp))
             }
-        }
-    }
-}
-
-@Composable
-fun CategoryItem(title: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .background(Color.Black, RoundedCornerShape(15.dp))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = title, color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-        Button(
-            onClick = { /* Puedes mostrar una lista de ingredientes */ },
-            shape = CircleShape,
-            modifier = Modifier.size(30.dp),
-            contentPadding = PaddingValues(0.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-        ) {
-            Text("v", color = Color.Black)
         }
     }
 }

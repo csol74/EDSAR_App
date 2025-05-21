@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
@@ -60,10 +59,10 @@ fun HomeScreen(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Image(
-                            painter = painterResource(id = R.drawable.user_profile),
+                            painter = painterResource(id = R.drawable.edsar_logo),
                             contentDescription = "Imagen de perfil",
                             modifier = Modifier
-                                .size(100.dp)
+                                .size(80.dp)
                                 .clip(CircleShape)
                                 .clickable { showLogout = !showLogout },
                             contentScale = ContentScale.Crop
@@ -86,26 +85,30 @@ fun HomeScreen(
                 containerColor = Color.Black,
                 contentColor = Color.White
             ) {
-                IconButton(onClick = { onClickProfile() }) {
-                    Icon(Icons.Default.Person, contentDescription = "Perfil", modifier = Modifier.size(30.dp))
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = { onClickNews() }) {
-                    Icon(Icons.Default.Notifications, contentDescription = "Notificaciones", modifier = Modifier.size(30.dp))
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = { onClickRecetas() }) {
-                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Menú", modifier = Modifier.size(30.dp))
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = { /* Ya estás en home */ }) {
-                    Icon(Icons.Default.Home, contentDescription = "Home", modifier = Modifier.size(30.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { onClickProfile() }) {
+                        Icon(Icons.Default.Person, contentDescription = "Perfil", modifier = Modifier.size(30.dp))
+                    }
+                    IconButton(onClick = { onClickNews() }) {
+                        Icon(Icons.Default.Notifications, contentDescription = "Notificaciones", modifier = Modifier.size(30.dp))
+                    }
+                    IconButton(onClick = { onClickRecetas() }) {
+                        Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Menú", modifier = Modifier.size(30.dp))
+                    }
                 }
             }
         },
         containerColor = Color(0xFFFFA500)
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues)) {
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
             if (showLogout) {
                 Button(
                     onClick = { onClickLogout() },
@@ -119,27 +122,33 @@ fun HomeScreen(
                 }
             }
 
-            MealCard(
-                title = "¡A Desayunar!",
-                description = "¿Estás listo para hacer un desayuno saludable?",
-                imageRes = R.drawable.breakfast,
-                mealType = "Desayuno",
-                onMealSelected = onNavigateToMeal
-            )
-            MealCard(
-                title = "Hora de almorzar",
-                description = "Es momento de preparar un almuerzo saludable.",
-                imageRes = R.drawable.lunch,
-                mealType = "Almuerzo",
-                onMealSelected = onNavigateToMeal
-            )
-            MealCard(
-                title = "Vamos a cenar",
-                description = "Llegó la noche y con ella tu cena saludable.",
-                imageRes = R.drawable.dinner,
-                mealType = "Cena",
-                onMealSelected = onNavigateToMeal
-            )
+            // Distribución proporcional para cada tarjeta
+            Column(modifier = Modifier.fillMaxHeight()) {
+                MealCard(
+                    title = "¡A Desayunar!",
+                    description = "¿Estás listo para hacer un desayuno saludable?",
+                    imageRes = R.drawable.tosti,
+                    mealType = "Desayuno",
+                    onMealSelected = onNavigateToMeal,
+                    modifier = Modifier.weight(1f)
+                )
+                MealCard(
+                    title = "Hora de almorzar",
+                    description = "Es momento de preparar un almuerzo saludable.",
+                    imageRes = R.drawable.lol,
+                    mealType = "Almuerzo",
+                    onMealSelected = onNavigateToMeal,
+                    modifier = Modifier.weight(1f)
+                )
+                MealCard(
+                    title = "Vamos a cenar",
+                    description = "Llegó la noche y con ella tu cena saludable.",
+                    imageRes = R.drawable.dinner,
+                    mealType = "Cena",
+                    onMealSelected = onNavigateToMeal,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
     }
 }
@@ -150,38 +159,66 @@ fun MealCard(
     description: String,
     imageRes: Int,
     mealType: String,
-    onMealSelected: (String) -> Unit
+    onMealSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .background(Color.Black, shape = RoundedCornerShape(40.dp))
+            .wrapContentHeight()
+            .padding(horizontal = 16.dp, vertical = 10.dp) // Menor separación entre tarjetas
+            .clip(RoundedCornerShape(30.dp))
+            .background(Color.White)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Image(
-                painter = painterResource(id = imageRes),
-                contentDescription = title,
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 20.dp), // Padding interno reducido
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Imagen más pequeña y contenida
+            Box(
                 modifier = Modifier
-                    .size(100.dp)
-                    .clip(RoundedCornerShape(30.dp))
-            )
-            Spacer(modifier = Modifier.width(8.dp))
+                    .size(100.dp) // <-- antes era 75dp
+                    .clip(RoundedCornerShape(16.dp))
+            ) {
+                Image(
+                    painter = painterResource(id = imageRes),
+                    contentDescription = title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            Spacer(modifier = Modifier.width(20.dp))
+
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(end = 8.dp)
+                    .padding(end = 0.dp)
             ) {
-                Text(text = title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text(text = description, color = Color.White, fontSize = 14.sp)
+                Text(
+                    text = title,
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp // Compacto
+                )
+                Text(
+                    text = description,
+                    color = Color.Black,
+                    fontSize = 14.sp // Compacto
+                )
             }
+
             Button(
                 onClick = { onMealSelected(mealType) },
-                shape = CircleShape,
-                modifier = Modifier.size(60.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .height(44.dp) // Más bajo
+                    .width(70.dp), // Más angosto
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
             ) {
-                Text("Ir", color = Color.Black)
+                Text("Ir", color = Color.White, fontSize = 16.sp)
             }
         }
     }
