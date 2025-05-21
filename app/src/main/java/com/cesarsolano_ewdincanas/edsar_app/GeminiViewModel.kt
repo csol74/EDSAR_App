@@ -83,7 +83,30 @@ class GeminiViewModel : ViewModel() {
             }
         }
     }
+    fun generateProcedimientoDesdeTitulo(nombreReceta: String) {
+        viewModelScope.launch {
+            try {
+                _recipeState.value = RecipeState(isLoading = true)
 
+                val prompt = """
+                Eres un chef profesional. El usuario te pide el procedimiento de la siguiente receta: $nombreReceta
+
+                Devuélvelo en este formato exacto:
+
+                RECETA1:$nombreReceta
+                INGREDIENTES1:Ingrediente 1, Ingrediente 2, ...
+                PASOS1:Paso 1. ..., Paso 2. ..., Paso 3. ... 
+            """
+
+                val response = generativeModel.generateContent(prompt)
+                val recipes = parseRecipesFromResponse(response)
+
+                _recipeState.value = RecipeState(recipes = recipes)
+            } catch (e: Exception) {
+                _recipeState.value = RecipeState(error = "Error al cargar la receta: ${e.message}")
+            }
+        }
+    }
     private fun parseRecipesFromResponse(response: GenerateContentResponse): List<Recipe> {
         val recipes = mutableListOf<Recipe>()
         val responseText = response.text?.trim() ?: return emptyList()

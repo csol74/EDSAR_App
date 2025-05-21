@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cesarsolano_ewdincanas.edsar_app.ui.theme.EDSAR_AppTheme
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -29,6 +30,7 @@ class MainActivity : ComponentActivity() {
                 var myStartDestination = "login"
                 val auth = Firebase.auth
                 val currentUser = auth.currentUser
+
 
                 if (currentUser != null) {
                     myStartDestination = "home"
@@ -77,9 +79,6 @@ class MainActivity : ComponentActivity() {
                             onClickProfile = {
                                 navController.navigate("profile")
                             },
-                            onClickNews = {
-                                navController.navigate("news")
-                            },
                             onClickRecetas = {
                                 navController.navigate("listRecetas")
                             },
@@ -98,13 +97,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    composable("news") {
-                        News_Screen(
-                            onBackClick = {
-                                navController.popBackStack()
-                            }
-                        )
-                    }
 
                     composable("listRecetas") {
                         ListRecetasScreen(
@@ -114,7 +106,10 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-
+                    composable("detalleReceta/{titulo}") { backStackEntry ->
+                        val titulo = backStackEntry.arguments?.getString("titulo") ?: ""
+                        DetalleRecetaScreen(navController, titulo, viewModel())
+                    }
                     composable(
                         route = "meals/{mealType}",
                         arguments = listOf(navArgument("mealType") { type = NavType.StringType })

@@ -1,5 +1,4 @@
 package com.cesarsolano_ewdincanas.edsar_app
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,8 +7,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,13 +22,11 @@ import androidx.compose.ui.unit.sp
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onClickLogout: () -> Unit = {},
     onClickProfile: () -> Unit = {},
-    onClickNews: () -> Unit = {},
     onNavigateToMeal: (String) -> Unit = {},
     onClickRecetas: () -> Unit = {}
 ) {
@@ -72,11 +67,7 @@ fun HomeScreen(
                         Text(userName, color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 },
-                actions = {
-                    IconButton(onClick = { /* acción menú */ }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menú", tint = Color.White)
-                    }
-                },
+
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Black)
             )
         },
@@ -92,9 +83,6 @@ fun HomeScreen(
                 ) {
                     IconButton(onClick = { onClickProfile() }) {
                         Icon(Icons.Default.Person, contentDescription = "Perfil", modifier = Modifier.size(30.dp))
-                    }
-                    IconButton(onClick = { onClickNews() }) {
-                        Icon(Icons.Default.Notifications, contentDescription = "Notificaciones", modifier = Modifier.size(30.dp))
                     }
                     IconButton(onClick = { onClickRecetas() }) {
                         Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Menú", modifier = Modifier.size(30.dp))
